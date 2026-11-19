@@ -1,7 +1,10 @@
+// Google Cloud model lifecycle and model cards checked on 2026-11-19.
+// https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions
 const CHAT = [
+  ['gemini-4-neon', 'Gemini 4 Neon（需企业授权）'], ['gemini-4-hydrogen', 'Gemini 4 Hydrogen'],
   ['gemini-4-carbon', 'Gemini 4 Carbon'], ['gemini-4-argon', 'Gemini 4 Argon'],
   ['gemini-3.8-flash', 'Gemini 3.8 Flash'], ['gemini-3.7-flash', 'Gemini 3.7 Flash'],
-  ['gemini-3.6-flash', 'Gemini 3.6 Flash'], ['gemini-3.5-flash', 'Gemini 3.5 Flash'],
+  ['gemini-3.5-flash', 'Gemini 3.5 Flash'],
   ['gemini-3.5-flash-lite', 'Gemini 3.5 Flash-Lite'], ['gemini-3.1-pro-preview', 'Gemini 3.1 Pro'],
   ['gemini-3-flash-preview', 'Gemini 3 Flash'], ['gemini-3.1-flash-lite', 'Gemini 3.1 Flash-Lite'],
 ];
@@ -47,7 +50,8 @@ export async function vertexCapabilities({ connection, secret, fetchImpl, purpos
   const efforts = purpose === 'chat' ? STANDARD_EFFORTS : [];
   return { available: true, source, liveError, catalogNote, supportsManualModel: false, efforts,
     models: models.map((model) => ({ id: model.id, name: model.name || model.id,
-      efforts: /^gemini-2\./u.test(model.id) ? [] : efforts })) };
+      efforts: purpose === 'chat' && /^gemini-4-(?:neon|hydrogen)$/u.test(model.id)
+        ? [...STANDARD_EFFORTS, 'xhigh'] : /^gemini-2\./u.test(model.id) ? [] : efforts })) };
 }
 
 export function vertexModelTarget(connection, secret, model, method) {

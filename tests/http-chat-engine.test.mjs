@@ -85,6 +85,11 @@ test('Vertex fallback exposes current Gemini models with valid Argon thinking le
   const argon = result.models.find((item) => item.id === 'gemini-4-argon');
   assert.equal(result.source, 'built-in');
   assert.deepEqual(argon.efforts, ['low', 'medium', 'high']);
+  assert.deepEqual(result.models.slice(0, 2).map(({ id, efforts }) => ({ id, efforts })), [
+    { id: 'gemini-4-neon', efforts: ['low', 'medium', 'high', 'xhigh'] },
+    { id: 'gemini-4-hydrogen', efforts: ['low', 'medium', 'high', 'xhigh'] },
+  ]);
+  assert.ok(!result.models.some(({ id }) => id === 'gemini-3.6-flash'));
   assert.match(result.catalogNote, /重新拉取/u);
 });
 
@@ -92,13 +97,13 @@ test('Vertex API-key refresh verifies candidates with CountTokens on the saved p
   const checked = [];
   const engine = new HttpChatEngine({ connection: { id: 'vertex', kind: 'vertex-ai',
     baseUrl: 'https://aiplatform.googleapis.com/v1/projects/project-1/locations/global/publishers/google/models/old:generateContent',
-    cachedModels: ['gemini-2.5-pro', 'gemini-custom-preview', 'claude-fable-5-2', 'gemini-3.8-flash-tts'], options: {} },
+    cachedModels: ['gemini-2.5-pro', 'gemini-3.6-flash', 'gemini-custom-preview', 'claude-fable-5-2', 'gemini-3.8-flash-tts'], options: {} },
   secret: 'working-key', sessions: sessions(), fetchImpl: async (url, init) => {
     assert.match(url, /projects\/project-1\/locations\/global\/publishers\/google\/models\/[^/]+:countTokens$/u);
     assert.equal(init.headers['x-goog-api-key'], 'working-key');
     const model = /\/models\/([^:]+)/u.exec(url)[1];
     checked.push(model);
-    return ['gemini-4-carbon', 'gemini-custom-preview'].includes(model)
+    return ['gemini-4-hydrogen', 'gemini-4-carbon', 'gemini-custom-preview'].includes(model)
       ? Response.json({ totalTokens: 1 }) : Response.json({}, { status: 404 });
   } });
   const initial = await engine.capabilities({ purpose: 'chat' });
@@ -107,7 +112,9 @@ test('Vertex API-key refresh verifies candidates with CountTokens on the saved p
   assert.match(initial.catalogNote, /API Key 不能列举/u);
   const result = await engine.capabilities({ purpose: 'chat', verify: true });
   assert.equal(result.source, 'verified');
-  assert.deepEqual(result.models.map(({ id }) => id), ['gemini-4-carbon', 'gemini-custom-preview']);
+  assert.deepEqual(result.models.map(({ id }) => id), ['gemini-4-hydrogen', 'gemini-4-carbon', 'gemini-custom-preview']);
+  assert.ok(checked.includes('gemini-4-neon') && checked.includes('gemini-4-hydrogen'));
+  assert.ok(checked.includes('gemini-3.6-flash'));
   assert.ok(checked.includes('gemini-2.5-pro'));
   assert.ok(!checked.includes('claude-fable-5-2') && !checked.includes('gemini-3.8-flash-tts'));
 });
