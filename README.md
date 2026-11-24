@@ -96,6 +96,20 @@ Token 也可继续由 `TELEGRAM_BOT_TOKEN` 提供给默认 Bot。若未设置管
 不必重输。公用设备可点击页头“退出”并确认“忘记本机登录”。栖光庭主题支持暂停动效，并遵循系统的减少动态效果设置。
 主题资产及动效说明见 [docs/gentian-theme.md](./docs/gentian-theme.md)。
 
+### 接入 Google AI Studio 聊天模型
+
+在「连接预设」中新建一条连接，按下表填写，把 Google AI Studio 创建的 API Key 填在「密钥」栏，点击「保存连接」。每条连接独立保存密钥，可以和已有的 Codex、Vertex AI 连接一起使用。
+
+| 设置 | 填写值 |
+| --- | --- |
+| 名称 | Google AI Studio |
+| 连接类型 | OpenAI 兼容 API / 中转站 |
+| 服务地址 | `https://generativelanguage.googleapis.com/v1beta/openai` |
+| 接口格式 | Chat Completions |
+| 密钥放置方式 | Bearer Header |
+
+打开要使用它的 Bot，在「人物与聊天模型」选择这条连接，再从模型目录选择模型并保存。如果目录里有 `gemini-4-neon`，可以选中后发一句短消息验证。连接自检只读取目录，模型权限和可用额度以实际回复为准。[Google AI Studio 接口说明](https://ai.google.dev/gemini-api/docs/openai)
+
 在 Telegram 或微信的 Bot 详情中点「开启新会话」，可选「带摘要」接续上一段的要点，或「不带摘要」从头聊。
 「压缩会话」适合长聊后继续同一话题。Codex 支持原生压缩，其他连接可整理成摘要后续聊。
 Telegram 私聊也可以单独发 `/new` 或 `/compact`。旧消息留在原聊天页，外置记忆按 Bot
