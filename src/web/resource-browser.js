@@ -20,6 +20,10 @@ export function openResourceDetail(key, id) {
   browsers.get(key)?.openDetail(id);
 }
 
+export function editConnection(id) {
+  browsers.get('connections')?.openEdit(id);
+}
+
 function createBrowser(app, definition) {
   const form = $(definition.form); const original = [...form.children];
   const editor = document.createElement('fieldset'); editor.className = 'resource-editor'; editor.hidden = true; editor.disabled = true;
@@ -96,7 +100,7 @@ function createBrowser(app, definition) {
     detail.facts.replaceChildren(...definition.facts(currentApp.data, item).map(([label, value]) => fact(label, value)));
   }
   render();
-  return { refresh, saved, openDetail };
+  return { refresh, saved, openDetail, openEdit };
 }
 
 function listView(definition) {

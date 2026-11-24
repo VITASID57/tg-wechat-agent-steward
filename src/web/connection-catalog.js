@@ -1,3 +1,4 @@
+import { transportKind } from './connection-types.js';
 import { $, csv } from './dom.js';
 import { bindModelRefresh, loadModelPicker } from './model-picker.js';
 
@@ -35,7 +36,7 @@ async function refreshConnectionCatalog(connection, verify = false) {
 }
 
 function draftConnection(connection) {
-  const kind = $('#connection-kind').value || connection?.kind || 'openai-compatible';
+  const kind = transportKind($('#connection-kind').value) || connection?.kind || 'openai-compatible';
   return {
     id: connection?.id || '', name: $('#connection-name').value || connection?.name || '临时连接', kind,
     baseUrl: $('#connection-url').value, secret: $('#connection-secret').value,

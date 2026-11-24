@@ -98,15 +98,7 @@ Token 也可继续由 `TELEGRAM_BOT_TOKEN` 提供给默认 Bot。若未设置管
 
 ### 接入 Google AI Studio 聊天模型
 
-在「连接预设」中新建一条连接，按下表填写，把 Google AI Studio 创建的 API Key 填在「密钥」栏，点击「保存连接」。每条连接独立保存密钥，可以和已有的 Codex、Vertex AI 连接一起使用。
-
-| 设置 | 填写值 |
-| --- | --- |
-| 名称 | Google AI Studio |
-| 连接类型 | OpenAI 兼容 API / 中转站 |
-| 服务地址 | `https://generativelanguage.googleapis.com/v1beta/openai` |
-| 接口格式 | Chat Completions |
-| 密钥放置方式 | Bearer Header |
+在「连接预设」点「新建连接」，类型选 **Google AI Studio**。服务地址和接口格式会自动填好。把 Google AI Studio 创建的 API Key 填在「密钥」栏，点击「保存连接」。已有连接可以从列表点进「编辑」，也可以在 Bot 设置里点「编辑连接预设 ↗」直接打开对应的表单。
 
 打开要使用它的 Bot，在「人物与聊天模型」选择这条连接，再从模型目录选择模型并保存。如果目录里有 `gemini-4-neon`，可以选中后发一句短消息验证。连接自检只读取目录，模型权限和可用额度以实际回复为准。[Google AI Studio 接口说明](https://ai.google.dev/gemini-api/docs/openai)
 

@@ -1,10 +1,12 @@
+import { displayKind } from './connection-types.js';
+
 export function createResourceDefinitions({ kinds, fillConnection, fillProfile, fillVoice, fillImage, fillSticker }) {
   const kindName = (kind) => kinds.find(([value]) => value === kind)?.[1] || kind;
   return [
     { key: 'connections', endpoint: '/api/connections', form: '#connection-form', picker: '#connection-picker', newButton: '#new-connection', title: '连接预设', singular: '连接', eyebrow: 'CONNECTION VAULT',
       description: '一个连接可供多只 Bot 或预设使用。', items: (data) => data.connections, fill: fillConnection,
-      summary: (item) => kindName(item.kind),
-      groups: groupConnections, facts: (_data, item) => [['类型', kindName(item.kind)], ['服务地址', item.baseUrl || '本机订阅 / CLI'], ['密钥', item.hasSecret ? '已保存' : '未保存'],
+      summary: (item) => kindName(displayKind(item)),
+      groups: groupConnections, facts: (_data, item) => [['类型', kindName(displayKind(item))], ['服务地址', item.baseUrl || '本机订阅 / CLI'], ['密钥', item.hasSecret ? '已保存' : '未保存'],
         ...(item.lastTest ? [['最近自检', item.lastTest.title]] : [])] },
     { key: 'profiles', endpoint: '/api/profiles', form: '#profile-form', picker: '#profile-picker', newButton: '#new-profile', title: '人物档案', singular: '人物', eyebrow: 'PROMPT MODULES',
       description: '每个人物独立保存启用中的规则模块。', items: (data) => data.profiles, fill: fillProfile,

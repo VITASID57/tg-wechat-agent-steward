@@ -106,7 +106,7 @@
           <div class="switch-grid"><label class="switch"><input id="bot-enabled" type="checkbox"><span></span><b>启用 Bot</b><small>保存后真实启停</small></label><label class="switch" data-telegram-only><input id="bot-group" type="checkbox"><span></span><b>群聊模式</b><small>只回应明确提及</small></label></div>
           </div></details>
           <details class="bot-section" data-bot-section="chat" open><summary><span>人物与聊天模型</span><small data-section-status="chat"></small></summary><div class="bot-section-body">
-          <div class="form-grid two"><div><label for="bot-profile">使用的人物档案</label><select id="bot-profile"></select></div><div><label for="bot-chat-connection">连接预设</label><select id="bot-chat-connection"></select></div></div>
+          <div class="form-grid two"><div><label for="bot-profile">使用的人物档案</label><select id="bot-profile"></select></div><div><label for="bot-chat-connection">连接预设</label><select id="bot-chat-connection"></select><a id="bot-edit-connection" class="hint" target="_blank" rel="noopener" hidden>编辑连接预设 ↗</a></div></div>
           <p class="hint">人物档案可供多只 Bot 共用。修改档案会影响所有使用它的 Bot。</p>
           <div class="form-grid two"><div><label for="bot-model">模型</label><div class="model-picker-inline"><select id="bot-model" aria-describedby="bot-model-status"><option value="">选择连接后拉取</option></select><button type="button" id="bot-model-refresh" class="quiet">拉取模型</button></div><p class="hint" id="bot-model-status">选择连接后会自动读取模型目录。</p></div><div><label for="bot-effort">思考强度</label><select id="bot-effort"><option value="">后端默认</option></select></div></div>
           </div></details>

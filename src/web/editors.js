@@ -8,6 +8,7 @@ import { bindBotAvatar, resetAvatarFeedback } from './bot-avatar.js';
 import { bindWechatEditor, fillWechatEditor } from './wechat-editor.js';
 import { bindRuntimeUi, fillRuntimeMode, refreshRuntimeExplanation } from './runtime-diagnostics.js';
 import { bindProfileEditor, fillProfileEditor, refreshProfileEditor } from './profile-editor.js';
+import { KINDS, displayKind, transportKind, showConnectionType } from './connection-types.js';
 import { bindConnectionCatalog, fillConnectionCatalog } from './connection-catalog.js';
 import { bindConnectionTest, fillConnectionTest } from './connection-health.js';
 import { bindModelRefresh, loadModelPicker } from './model-picker.js';
@@ -15,16 +16,6 @@ import { bindResourceBrowsers, refreshResourceBrowsers, resourceSaved } from './
 import { createResourceDefinitions } from './resource-definitions.js';
 import { bindToolSwitches, fillToolSwitches, disabledToolSettings } from './tool-switches.js';
 import { bindWakeTargetEditor, fillWakeTarget, wakeTarget } from './wake-target-editor.js';
-
-const KINDS = [
-  ['codex', 'Codex 订阅 / CLI'], ['claude', 'Claude Code CLI'], ['grok-build', 'Grok Build 订阅 / CLI'],
-  ['openai-compatible', 'OpenAI 兼容 API / 中转站'], ['anthropic-compatible', 'Anthropic 兼容 API / 中转站'],
-  ['vertex-ai', 'Google Vertex AI'], ['minimax', 'MiniMax TTS'], ['elevenlabs', 'ElevenLabs TTS'],
-  ['gpt-sovits', '本地 GPT-SoVITS'], ['edge-tts', '免费 Edge TTS'], ['whisper-local', '本地 Whisper STT'],
-  ['memory-http', '外置记忆 HTTP'], ['memory-mcp', '外置记忆 MCP（记忆 + 工具）'],
-  ['novelai', 'NovelAI 生图'], ['comfyui', '本地 / 远程 ComfyUI'],
-  ['mcp-remote', '远程 MCP（HTTP）'], ['mcp-stdio', '本机 MCP（stdio）'],
-];
 
 export function bindEditors(app) {
   options($('#connection-kind'), KINDS.map(([value, label]) => ({ value, label })));
@@ -37,7 +28,7 @@ export function bindEditors(app) {
   bindToolSwitches();
   bindWechatEditor(app, () => saveBotDraft(app));
   bindRuntimeUi();
-  $('#connection-kind').onchange = showConnectionFields;
+  $('#connection-kind').onchange = () => { showConnectionType(true); refreshRuntimeExplanation(); };
   $('#bot-form').onsubmit = (event) => saveBot(event, app);
   $('#delete-bot').onclick = () => removeBot(app);
   $('#pair-button').onclick = () => pair(app);
@@ -75,7 +66,7 @@ function fillConnection(app, itemId) {
   const item = app.data.connections.find((entry) => entry.id === itemId);
   $('#connection-picker').value = item?.id || '';
   $('#connection-id').value = item?.id || ''; $('#connection-name').value = item?.name || '';
-  $('#connection-kind').value = item?.kind || 'openai-compatible'; $('#connection-url').value = item?.baseUrl || '';
+  $('#connection-kind').value = displayKind(item); $('#connection-url').value = item?.baseUrl || '';
   $('#connection-secret').value = '';
   $('#connection-workdir').value = item?.options?.workingDirectory || ''; $('#connection-api-style').value = item?.options?.apiStyle || 'chat-completions';
   $('#connection-group-id').value = item?.options?.groupId || ''; $('#connection-command').value = item?.options?.command || '';
@@ -90,21 +81,13 @@ function fillConnection(app, itemId) {
   $('#connection-access-mode').value = item?.options?.accessMode || 'approval'; $('#connection-stt-model').value = item?.options?.transcriptionModel || '';
   $('#connection-args').value = (item?.options?.args || []).join('\n'); $('#connection-secret-env').value = item?.options?.secretEnv || '';
   $('#connection-secret-state').textContent = item?.hasSecret ? '密钥已保存；留空不会覆盖' : '尚未保存密钥';
-  fillRuntimeMode(item); fillConnectionCatalog(item); fillConnectionTest(item); showConnectionFields();
-}
-
-function showConnectionFields() {
-  $('#connection-api-format').hidden = $('#connection-kind').value !== 'openai-compatible';
-  $('#connection-url-help').textContent = $('#connection-kind').value === 'vertex-ai'
-    ? 'Gemini 4 Argon 使用 global 发布者地址。API Key 选 Google x-goog-api-key，OAuth access token 选 Bearer。'
-    : 'API 与远程 MCP 填服务地址；CLI 与本机命令留空。';
-  refreshRuntimeExplanation();
+  fillRuntimeMode(item); showConnectionType(); fillConnectionCatalog(item); fillConnectionTest(item); refreshRuntimeExplanation();
 }
 
 async function saveConnection(event, app) {
   event.preventDefault(); const existingId = $('#connection-id').value;
   const existing = app.data.connections.find((item) => item.id === existingId);
-  const body = { name: $('#connection-name').value, kind: $('#connection-kind').value, baseUrl: $('#connection-url').value,
+  const body = { name: $('#connection-name').value, kind: transportKind($('#connection-kind').value), baseUrl: $('#connection-url').value,
     secret: $('#connection-secret').value, cachedModels: csv($('#connection-models').value), options: { ...(existing?.options || {}),
       runtimeMode: $('#connection-runtime-mode').value,
       workingDirectory: $('#connection-workdir').value, apiStyle: $('#connection-api-style').value,
@@ -252,6 +235,9 @@ async function pair() {
 let botCatalog = { models: [], efforts: [] };
 async function loadModels(selected = $('#bot-model').value, selectedEffort = $('#bot-effort').value, verify = false) {
   const connectionId = $('#bot-chat-connection').value;
+  const edit = $('#bot-edit-connection');
+  edit.hidden = !connectionId;
+  edit.href = '?connection=' + encodeURIComponent(connectionId) + '#connections';
   await loadModelPicker({ select: $('#bot-model'), connectionId, purpose: 'chat', selected, verify,
     button: $('#bot-model-refresh'), status: $('#bot-model-status'), emptyLabel: '后端默认模型',
     onLoaded: (result) => { botCatalog = result; updateBotEfforts(selectedEffort); } });
